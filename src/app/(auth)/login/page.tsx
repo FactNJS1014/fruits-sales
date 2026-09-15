@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "link";
+import Link from "next/link";
 import { ShoppingBag, AlertCircle } from "lucide-react";
 
 // 1. แยกส่วน Form ที่ใช้ useSearchParams() ออกมาเป็น Component ย่อย
