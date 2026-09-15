@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "link";
 import { ShoppingBag, AlertCircle } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+// 1. แยกส่วน Form ที่ใช้ useSearchParams() ออกมาเป็น Component ย่อย
+function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromPath = searchParams.get("from") || "/";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,6 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
 
-      // นำผู้ใช้กลับไปหน้าที่พยายามกดสั่งจองก่อนหน้า (หรือหน้า /admin ถ้าเป็น admin)
       router.push(data.user.role === "ADMIN" ? "/admin" : fromPath);
       router.refresh();
     } catch (err: unknown) {
@@ -45,7 +45,7 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto my-16 bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
       <div className="text-center space-y-2">
-        <div className="inline-flex p-3 bg-blue-50 text-blue-600 rounded-2xl mb-2">
+        <div className="inline-flex p-3 bg-emerald-50 text-emerald-600 rounded-2xl mb-2">
           <ShoppingBag className="w-8 h-8" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">เข้าสู่ระบบ</h1>
@@ -71,7 +71,7 @@ export default function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-hidden"
+            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-hidden"
             placeholder="admin@fruitgarden.com"
           />
         </div>
@@ -85,7 +85,7 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-hidden"
+            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-hidden"
             placeholder="••••••••"
           />
         </div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-2.5 rounded-xl transition shadow-xs text-sm"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-semibold py-2.5 rounded-xl transition shadow-xs text-sm cursor-pointer"
         >
           {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
         </button>
@@ -103,11 +103,24 @@ export default function LoginPage() {
         ยังไม่มีบัญชีผู้ใช้?{" "}
         <Link
           href="/register"
-          className="text-blue-600 font-semibold hover:underline"
+          className="text-emerald-600 font-semibold hover:underline"
         >
           ลงทะเบียนใหม่
         </Link>
       </div>
     </div>
+  );
+}
+
+// 2. Export Page หลักพร้อมซ่อนภายใต้ Suspense Boundary
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-slate-500">กำลังโหลด...</div>
+      }
+    >
+      <LoginFormContent />
+    </Suspense>
   );
 }
